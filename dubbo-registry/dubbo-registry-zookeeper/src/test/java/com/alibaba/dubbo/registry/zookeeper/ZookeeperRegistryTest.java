@@ -30,11 +30,11 @@ import org.junit.Test;
 public class ZookeeperRegistryTest {
 
     String service = "com.alibaba.dubbo.test.injvmServie";
-    URL registryUrl = URL.valueOf("zookeeper://239.255.255.255/");
+    URL registryUrl = URL.valueOf("zookeeper://192.168.0.10/");
     URL serviceUrl = URL.valueOf("zookeeper://zookeeper/" + service
             + "?notify=false&methods=test1,test2");
     URL consumerUrl = URL.valueOf("zookeeper://consumer/" + service + "?notify=false&methods=test1,test2");
-    // ZookeeperRegistry registry    = new ZookeeperRegistry(registryUrl);
+//     ZookeeperRegistry registry    = new ZookeeperRegistry(registryUrl);
 
     /**
      * @throws java.lang.Exception
@@ -48,7 +48,7 @@ public class ZookeeperRegistryTest {
      */
     @Before
     public void setUp() throws Exception {
-        //registry.register(service, serviceUrl);
+//        registry.register(service, serviceUrl);
     }
 
     /*@Test(expected = IllegalStateException.class)
