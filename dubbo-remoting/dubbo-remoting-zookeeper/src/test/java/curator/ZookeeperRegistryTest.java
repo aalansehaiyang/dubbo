@@ -18,6 +18,8 @@ import org.apache.zookeeper.data.Stat;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.alibaba.dubbo.common.URL;
+
 /**
  * curator功能测试
  * 
@@ -25,7 +27,7 @@ import org.junit.Test;
  */
 public class ZookeeperRegistryTest {
 
-    private String           zkPath = "192.168.0.10:2181";
+    private String           zkPath = "172.16.110.91:2181";
     private CuratorFramework client;
 
     @Before
@@ -100,7 +102,11 @@ public class ZookeeperRegistryTest {
     @Test
     public void testCreateEphemeral_1() {
         try {
-            client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath("/register_boot2/node1");
+            String leafNode = "dubbo://127.0.0.1:20880/com.xxx.XxxService?version=1.0.0&group=aa";
+
+            client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath("/register_boot2/"
+                                                                                                     + URL.encode(leafNode));
+
         } catch (NodeExistsException e) {
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
@@ -165,8 +171,11 @@ public class ZookeeperRegistryTest {
     @Test
     public void testGetChildren() {
         try {
-            List<String> list = client.getChildren().forPath("/register_boot");
+            List<String> list = client.getChildren().forPath("/register_boot2");
             System.out.println(list);
+            for (String a : list) {
+                System.out.println(URL.decode(a));
+            }
         } catch (NoNodeException e) {
             System.out.println("NoNodeException");
         } catch (Exception e) {

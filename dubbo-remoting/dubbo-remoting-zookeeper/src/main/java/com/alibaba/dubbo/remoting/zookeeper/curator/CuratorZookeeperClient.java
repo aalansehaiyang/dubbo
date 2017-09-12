@@ -51,6 +51,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
         }
     }
 
+    //创建持久节点
     public void createPersistent(String path) {
         try {
             client.create().forPath(path);
@@ -60,6 +61,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
         }
     }
 
+    //创建临时节点，心跳检测不到会自动删除
     public void createEphemeral(String path) {
         try {
             client.create().withMode(CreateMode.EPHEMERAL).forPath(path);
@@ -69,6 +71,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
         }
     }
 
+    //删除节点
     public void delete(String path) {
         try {
             client.delete().forPath(path);
@@ -78,6 +81,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
         }
     }
 
+    //获取节点下的所有子节点
     public List<String> getChildren(String path) {
         try {
             return client.getChildren().forPath(path);
@@ -100,6 +104,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
         return new CuratorWatcherImpl(listener);
     }
 
+    //获取节点下的所有子节点,并对节点设置监听
     public List<String> addTargetChildListener(String path, CuratorWatcher listener) {
         try {
             return client.getChildren().usingWatcher(listener).forPath(path);
@@ -114,6 +119,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
         ((CuratorWatcherImpl) listener).unwatch();
     }
 
+    // 监听处理类，每一次子节点变化，交由ChildListener处理，并重新设置监听
     private class CuratorWatcherImpl implements CuratorWatcher {
 
         private volatile ChildListener listener;

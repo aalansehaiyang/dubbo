@@ -54,6 +54,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     private final ConcurrentMap<URL, ConcurrentMap<NotifyListener, ChildListener>> zkListeners = new ConcurrentHashMap<URL, ConcurrentMap<NotifyListener, ChildListener>>();
 
+   // dubbo自己封装的ZookeeperClient,底层可支持zkClient或curator两类主流zk客户端
     private final ZookeeperClient zkClient;
 
     public ZookeeperRegistry(URL url, ZookeeperTransporter zookeeperTransporter) {
@@ -105,6 +106,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         }
     }
 
+    // 服务提供方启动时，注册url
     protected void doRegister(URL url) {
         try {
             zkClient.create(toUrlPath(url), url.getParameter(Constants.DYNAMIC_KEY, true));
@@ -112,7 +114,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
             throw new RpcException("Failed to register " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
         }
     }
-
+    
+    // 取消注册，比如发布时停止服务
     protected void doUnregister(URL url) {
         try {
             zkClient.delete(toUrlPath(url));
@@ -196,6 +199,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         }
     }
 
+   //查询符合条件的已注册数据，与订阅的推模式相对应，这里为拉模式，只返回一次结果。
     public List<URL> lookup(URL url) {
         if (url == null) {
             throw new IllegalArgumentException("lookup url == null");
@@ -252,16 +256,25 @@ public class ZookeeperRegistry extends FailbackRegistry {
         return toServicePath(url) + Constants.PATH_SEPARATOR + url.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY);
     }
 
+    // 拼接url（zk的叶子节点），并对字符串编码
     private String toUrlPath(URL url) {
         return toCategoryPath(url) + Constants.PATH_SEPARATOR + URL.encode(url.toFullString());
     }
 
+    /**
+     * <pre>
+     * provider格式,zk叶子节点name
+     * dubbo://127.0.0.1:20880/com.xxx.XxxService?version=1.0.0&group=aa
+     * </pre>
+     */
     private List<URL> toUrlsWithoutEmpty(URL consumer, List<String> providers) {
         List<URL> urls = new ArrayList<URL>();
         if (providers != null && providers.size() > 0) {
             for (String provider : providers) {
+                // 将provider 字符串内容 解码
                 provider = URL.decode(provider);
                 if (provider.contains("://")) {
+                    // 将字符串的信息拆解，组装URL对象
                     URL url = URL.valueOf(provider);
                     if (UrlUtils.isMatch(consumer, url)) {
                         urls.add(url);
