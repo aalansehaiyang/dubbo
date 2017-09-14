@@ -72,6 +72,9 @@ public abstract class AbstractRegistry implements Registry {
     private final AtomicLong lastCacheChanged = new AtomicLong();
     private final Set<URL> registered = new ConcurrentHashSet<URL>();
     private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<URL, Set<NotifyListener>>();
+    // URL：消费端的服务url
+    // Map-key：策略（如provider）
+    // Map-value:比如provider的机器列表
     private final ConcurrentMap<URL, Map<String, List<URL>>> notified = new ConcurrentHashMap<URL, Map<String, List<URL>>>();
     private URL registryUrl;
     // 本地磁盘缓存文件
@@ -388,6 +391,9 @@ public abstract class AbstractRegistry implements Registry {
         }
     }
 
+    /**
+     * 将收到的变更通知，放入本地内存、文件缓存
+     */
     protected void notify(URL url, NotifyListener listener, List<URL> urls) {
         if (url == null) {
             throw new IllegalArgumentException("notify url == null");
@@ -428,6 +434,8 @@ public abstract class AbstractRegistry implements Registry {
             List<URL> categoryList = entry.getValue();
             categoryNotified.put(category, categoryList);
             saveProperties(url);
+            //com.alibaba.dubbo.registry.integration.RegistryDirectory.notify(List<URL>)
+            //invokerURL列表转换为invoker列表
             listener.notify(categoryList);
         }
     }
@@ -452,9 +460,11 @@ public abstract class AbstractRegistry implements Registry {
             }
             properties.setProperty(url.getServiceKey(), buf.toString());
             long version = lastCacheChanged.incrementAndGet();
+            // 同步保存到本地文件缓存
             if (syncSaveFile) {
                 doSaveProperties(version);
             } else {
+             // 异步保存到本地文件缓存
                 registryCacheExecutor.execute(new SaveProperties(version));
             }
         } catch (Throwable t) {

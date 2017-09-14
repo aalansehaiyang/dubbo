@@ -15,9 +15,15 @@
  */
 package com.alibaba.dubbo.registry.zookeeper;
 
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
 import com.alibaba.dubbo.common.URL;
+import com.alibaba.dubbo.common.utils.StringUtils;
+import com.alibaba.dubbo.registry.NotifyListener;
 
 import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -89,19 +95,19 @@ public class ZookeeperRegistryTest {
      */
     @Test
     public void testSubscribe() {
-        /*final String subscribearg = "arg1=1&arg2=2";
-        // verify lisener.
-        final AtomicReference<Map<String, String>> args = new AtomicReference<Map<String, String>>();
-        registry.subscribe(service, new URL("dubbo", NetUtils.getLocalHost(), 0, StringUtils.parseQueryString(subscribearg)), new NotifyListener() {
-
-            public void notify(List<URL> urls) {
-                // FIXME assertEquals(ZookeeperRegistry.this.service, service);
-                args.set(urls.get(0).getParameters());
-            }
-        });
-        assertEquals(serviceUrl.toParameterString(), StringUtils.toQueryString(args.get()));
-        Map<String, String> arg = registry.getSubscribed(service);
-        assertEquals(subscribearg, StringUtils.toQueryString(arg));*/
+//        final String subscribearg = "arg1=1&arg2=2";
+//        // verify lisener.
+//        final AtomicReference<Map<String, String>> args = new AtomicReference<Map<String, String>>();
+//        registry.subscribe(service, new URL("dubbo", NetUtils.getLocalHost(), 0, StringUtils.parseQueryString(subscribearg)), new NotifyListener() {
+//
+//            public void notify(List<URL> urls) {
+//                // FIXME assertEquals(ZookeeperRegistry.this.service, service);
+//                args.set(urls.get(0).getParameters());
+//            }
+//        });
+//        assertEquals(serviceUrl.toParameterString(), StringUtils.toQueryString(args.get()));
+//        Map<String, String> arg = registry.getSubscribed(service);
+//        assertEquals(subscribearg, StringUtils.toQueryString(arg));
 
     }
 
