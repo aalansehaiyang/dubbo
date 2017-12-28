@@ -1,10 +1,12 @@
 package curator;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorWatcher;
+import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.RetryNTimes;
@@ -27,7 +29,7 @@ import com.alibaba.dubbo.common.URL;
  */
 public class ZookeeperRegistryTest {
 
-    private String           zkPath = "172.16.110.91:2181";
+    private String           zkPath = "172.16.104.200:2181,172.16.104.200:2182,172.16.104.200:2183";
     private CuratorFramework client;
 
     @Before
@@ -269,6 +271,25 @@ public class ZookeeperRegistryTest {
     @Test
     public void doClose() {
         client.close();
+    }
+
+    /**
+     * 当前线程加的锁只能在当前线程中进行解锁，不能再其他线程中进行解锁。
+     */
+    @Test
+    public void lock() throws Exception {
+
+        for (int i = 0; i < 10; i++) {
+            String lockKey = "/lock" + i;
+            InterProcessMutex mutex = new InterProcessMutex(client, "/dubbo" + lockKey);
+            boolean lock = mutex.acquire(10, TimeUnit.MILLISECONDS);
+            if (lock) {
+                System.out.println("获取锁" + lockKey);
+            }
+
+            mutex.release();
+            System.out.println("释放锁" + lockKey);
+        }
     }
 
 }
