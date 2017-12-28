@@ -1,6 +1,7 @@
 package curator;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.curator.framework.CuratorFramework;
@@ -290,6 +291,59 @@ public class ZookeeperRegistryTest {
             mutex.release();
             System.out.println("释放锁" + lockKey);
         }
+    }
+
+    @Test
+    public void lock_1() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        String lock = "/d/lock";
+        for (int i = 1; i < 11; i++) {
+            new Thread(new LockTask(latch, lock)).start();
+        }
+        latch.countDown();
+
+        Thread.sleep(200000);
+    }
+
+    public class LockTask implements Runnable {
+
+        private CountDownLatch latch;
+        private String         lock;
+
+        public LockTask(CountDownLatch latch, String lock){
+            this.latch = latch;
+            this.lock = lock;
+        }
+
+        @Override
+        public void run() {
+
+            String name = Thread.currentThread().getName();
+            InterProcessMutex mutex = new InterProcessMutex(client, lock);
+            boolean result;
+            try {
+                
+                latch.await();
+
+                //尝试获取锁
+                result = mutex.acquire(10, TimeUnit.MILLISECONDS);
+                if (result) {
+                    System.out.println(name + "：获取锁");
+
+                    // 模拟业务，处理一段时间
+                    Thread.sleep(200);
+
+                    mutex.release();
+                    System.out.println(name + "：释放锁");
+                } else {
+                    System.out.println(name + "：没有拿到锁");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+
     }
 
 }
